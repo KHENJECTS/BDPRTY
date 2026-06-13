@@ -103,3 +103,36 @@ export const AWAKENING = {
   birdCount: 24,
   moteCount: 600,
 };
+
+// Konstanta player (Sprint 2) — fly/hover bergaya dream-like, bukan physics berat.
+export const PLAYER = {
+  walkSpeed: 4,
+  runSpeed: 9,
+  accel: 0.18, // faktor lerp velocity (0..1) agar gerak halus
+  lookSensitivity: 0.0022,
+  jumpImpulse: 5.5,
+  gravityScale: 0.35, // skala gravitasi store; <1 = terasa melayang (§4.3)
+  floorY: 1.8, // ketinggian hover saat gravitasi ke bawah (clamp lantai)
+  ceilingY: 80, // batas saat gravitasi terbalik (Sprint 4)
+};
+
+// Konstanta zona Discovery (Sprint 2).
+export const DISCOVERY = {
+  // Pulau-pulau penanda area discovery (pola parallax seperti Awakening).
+  islands: [
+    { pos: [0, -3, -10], scale: 1.8, seed: 11 },
+    { pos: [-18, -7, -28], scale: 2.0, seed: 12 },
+    { pos: [22, -2, -34], scale: 2.6, seed: 13 },
+  ] as Array<{ pos: [number, number, number]; scale: number; seed: number }>,
+  // Discoverables: orb bercahaya dengan radius proximity.
+  orbs: [
+    { id: "orb-echo", pos: [4, 1.5, -8], color: "#ffd27a" },
+    { id: "orb-spark", pos: [-6, 2.2, -12], color: "#7adfff" },
+    { id: "orb-bloom", pos: [1, 3.0, -16], color: "#ff9ad1" },
+    { id: "orb-drift", pos: [9, 2.0, -20], color: "#b6ff8a" },
+  ] as Array<{ id: string; pos: [number, number, number]; color: string }>,
+  proximityRadius: 3.2, // jarak trigger penemuan
+  glowRadius: 7, // jarak mulai highlight/scale halus
+  requiredToAdvance: 3, // jumlah penemuan untuk lanjut ke 'memories'
+  sfx: "/audio/discover.webm", // opsional; aman jika belum ada (Howler tak crash)
+};

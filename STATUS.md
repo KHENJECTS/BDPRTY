@@ -4,8 +4,8 @@
 | --- | --- | --- |
 | 0 | Skeleton (Next 15 + R3F + store + loop) | ✅ Selesai |
 | 1 | Awakening (sky, fog, pulau, burung, awan, motes, audio, kamera FREE) | ✅ Selesai |
-| 2 | Player & Discovery | ⏭️ NEXT TASK |
-| 3 | Memories | ⬛ Belum |
+| 2 | Player & Discovery | ✅ Selesai |
+| 3 | Memories | ⏭️ NEXT TASK |
 | 4 | Impossible (gravity flip, camera RAIL) | ⬛ Belum |
 | 5 | Revelation | ⬛ Belum |
 | 6 | Finale | ⬛ Belum |
@@ -16,6 +16,8 @@
 **[Sesi 2] Fix dependency:** runtime error `ReactCurrentOwner` (R3F v8 di atas React 19) — sempat diperbaiki dengan pin React 18.3.1 + `overrides`. **Digantikan oleh Sesi 3.**
 
 **[Sesi 3] Migrasi React 19:** beralih ke React 19 + @react-three/fiber v9 + drei v10 + postprocessing v3 (jalur native Next 15). **`overrides` pin React 18 DIHAPUS** (wajib, kalau tidak upgrade batal). Audit kode statis: AMAN, tanpa perubahan kode. Setelah update WAJIB `rm -rf node_modules package-lock.json && npm install`. Detail di `HANDOFF.md` §8.
+
+**[Sprint 2] Player & Discovery — selesai:** player FREE bisa digerakkan (WASD + look + Shift lari + Space lompat) via `useCharacterMovement`, sadar-gravity; `DiscoveryZone` + orb `Discoverable` (proximity highlight/SFX); auto-advance `awakening→discovery` (minDuration) & `discovery→memories` (saat cukup orb). Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §9.
 
 **Lanjut di:** `NEXT_TASK.md` · **Konteks lengkap:** `HANDOFF.md`
 

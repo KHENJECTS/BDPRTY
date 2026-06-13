@@ -3,11 +3,15 @@
 import { useEffect } from "react";
 import gsap from "gsap";
 import { useExperienceStore } from "@/state/useExperienceStore";
+import type { Phase } from "@/state/useExperienceStore";
 import { PHASE_FLOW } from "./phaseConfig";
 
 // Master timeline pengalaman:
 //  1) Setiap kali phase berubah, set cameraMode dari PHASE_FLOW.
-//  2) Menjalankan jam global (store.progress 0..1) selama ≈ 8 menit, dipause
+//  2) Auto-advance fase ber-minDuration (mis. awakening 8s -> discovery) via
+//     PHASE_FLOW.next; fase tanpa minDuration lanjut manual (discovery menunggu
+//     cukup discoverable -> memories).
+//  3) Menjalankan jam global (store.progress 0..1) selama ≈ 8 menit, dipause
 //     saat di threshold. progress dipakai FX & kamera rail di sprint berikutnya.
 export function usePhaseTimeline() {
   useEffect(() => {
@@ -24,6 +28,34 @@ export function usePhaseTimeline() {
       (phase) => applyCameraMode(phase),
     );
     return unsub;
+  }, []);
+
+  // Auto-advance berbasis minDuration (Sprint 2): menggerakkan
+  // awakening -> discovery setelah durasi minimal. Dibatalkan jika fase berubah
+  // lebih dulu (mis. transisi manual via discoverable).
+  useEffect(() => {
+    let pending: gsap.core.Tween | null = null;
+    const schedule = (phase: Phase) => {
+      pending?.kill();
+      pending = null;
+      const cfg = PHASE_FLOW[phase];
+      if (cfg.minDuration != null && cfg.next) {
+        const next = cfg.next;
+        pending = gsap.delayedCall(cfg.minDuration, () => {
+          const s = useExperienceStore.getState();
+          if (s.phase === phase) s.setPhase(next);
+        });
+      }
+    };
+    schedule(useExperienceStore.getState().phase);
+    const unsub = useExperienceStore.subscribe(
+      (s) => s.phase,
+      (phase) => schedule(phase),
+    );
+    return () => {
+      pending?.kill();
+      unsub();
+    };
   }, []);
 
   useEffect(() => {

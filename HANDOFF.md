@@ -3,7 +3,7 @@
 > File ini ditulis agar siapa pun (atau sesi AI berikutnya) bisa melanjutkan tanpa
 > menganalisis ulang project. Baca ini + `NEXT_TASK.md` lalu langsung lanjut.
 
-**Terakhir diperbarui:** akhir sesi Sprint 0 + Sprint 1.
+**Terakhir diperbarui:** akhir sesi Sprint 2 (Player & Discovery) — lihat §9. (Dependency di jalur React 19, §8.)
 **Stack:** Next.js 15 · TS · R3F · three · drei · @react-three/postprocessing · GSAP · framer-motion · zustand · howler · GLSL.
 
 ---
@@ -24,8 +24,8 @@
 
 - [x] **Sprint 0 — Skeleton**: Next 15 + R3F + store + Threshold + PostFX + loop. Skeleton kini lengkap & runnable (semua import foundation ter-resolve).
 - [x] **Sprint 1 — Awakening**: skydome shader, fog volumetric (damped), pulau terapung, burung cahaya, awan parallax, motes, ambient audio, kamera floating (FREE), hint diegetik. **Mood lock tercapai.**
-- [ ] **Sprint 2 — Player & Discovery** ← NEXT TASK (lihat `NEXT_TASK.md`)
-- [ ] **Sprint 3 — Memories**
+- [x] **Sprint 2 — Player & Discovery**: player FREE (WASD + look + lari + lompat) via `useCharacterMovement`, sadar-gravity; `DiscoveryZone` + orb `Discoverable` (proximity highlight/SFX); transisi `awakening → discovery` (auto via minDuration) lalu `discovery → memories` (saat cukup orb ditemukan). Lihat §9.
+- [ ] **Sprint 3 — Memories** ← NEXT TASK (lihat `NEXT_TASK.md`)
 - [ ] **Sprint 4 — Impossible** (gravity flip, camera RAIL/GSAP)
 - [ ] **Sprint 5 — Revelation**
 - [ ] **Sprint 6 — Finale**
@@ -77,11 +77,18 @@ Bukan refactor/redesign.
 `app/page.tsx` -> `Experience` (Canvas + PerformanceMonitor + PostFX + DOM overlays)
 -> `Director` (`usePhaseTimeline`, set gravity per phase) -> `CameraDirector` +
 `PlayerController` + `World`. `World` -> `PhaseEnvironment` (+`SkyDome`) +
-`PhaseManager` (`AwakeningZone`) + sistem hidup (`Clouds`, `Birds`, `ParticleField`, `AmbientAudio`).
+`PhaseManager` (zona per fase) + sistem hidup (`Clouds`, `Birds`, `ParticleField`, `AmbientAudio`).
+
+`PlayerController` (Sprint 2) menggerakkan kamera saat `cameraMode === "FREE"`
+memakai `useCharacterMovement` (WASD + pointer-lock look + Shift lari + Space
+lompat), memutasi posisi via ref dan menghormati `gravity` store. `PhaseManager`
+memilih zona: `threshold/awakening` -> `AwakeningZone`, selebihnya -> `DiscoveryZone`.
 
 Flow fase: mulai di `threshold` -> klik tombol "tarik napas" (`Threshold.tsx`)
 meng-unlock audio + pointer lock + set phase `awakening`. `usePhaseTimeline`
-menyalakan jam global & meng-set cameraMode `FREE`.
+menyalakan jam global, meng-set cameraMode per `PHASE_FLOW`, dan auto-advance
+fase ber-`minDuration` (`awakening` 8s -> `discovery`). Dari `discovery`,
+mendekati cukup orb `Discoverable` memicu `setPhase("memories")`.
 
 ## 5. Catatan teknis penting
 
@@ -170,3 +177,35 @@ Verifikasi satu salinan React 19: `npm ls react react-dom` → harus **19.0.0** 
 - Jika ada peer warning three, pastikan satu salinan three 0.169 (`npm ls three`).
 
 **Status jalur ini vs Sesi 2:** entri Sesi 2 (§7, pin React 18.3.1 + overrides) kini **digantikan** oleh Sesi 3. Jangan terapkan keduanya bersamaan.
+
+---
+
+## 9. Work log — Sprint 2 (Player & Discovery)
+
+**Hasil:** kamera floating pasif (Sprint 1) kini jadi player yang bisa digerakkan, plus orb discoverable pertama di zona Discovery + wiring transisi fase.
+
+**File baru:**
+- `experience/world/zones/DiscoveryZone.tsx` — zona Discovery: pulau parallax (pola AwakeningZone) + sebaran orb `Discoverable`.
+- `experience/world/props/Discoverable.tsx` — orb bercahaya; cek proximity di `useFrame` (mutasi ref), `store.discover(id)` saat masuk `proximityRadius`, SFX opsional, lalu `setPhase` ke fase berikut via `PHASE_FLOW.discovery.next` saat `requiredToAdvance` tercapai.
+
+**File diisi (sebelumnya scaffold):**
+- `experience/player/useCharacterMovement.ts` — input terpadu: WASD + Shift (lari) + Space (lompat) + look pointer-lock; mengembalikan ref (tanpa setState).
+
+**Edit kecil (additif):**
+- `experience/player/PlayerController.tsx` — memakai `useCharacterMovement`; gerak horizontal relatif yaw + integrasi gravitasi vertikal (baca `store.gravity`, clamp lantai/plafon) + lompat. Tetap mutasi ref di `useFrame`, hanya saat `cameraMode === "FREE"`.
+- `experience/phases/PhaseManager.tsx` — pemilihan zona per fase (`threshold/awakening` -> Awakening, selebihnya -> Discovery), subscribe selektif slice `phase`.
+- `experience/phases/usePhaseTimeline.ts` — tambah efek auto-advance berbasis `PHASE_FLOW.minDuration` (awakening 8s -> discovery), dibatalkan bila fase berubah lebih dulu. Dua efek lama (cameraMode + jam GSAP) tidak diubah.
+- `lib/constants.ts` — tambah `PLAYER` (kecepatan/look/gravityScale/floor) & `DISCOVERY` (islands, orbs, radius, requiredToAdvance, sfx).
+
+**Definition of Done Sprint 2:**
+- [x] Player gerak mulus WASD + look; tanpa setState di `useFrame`.
+- [x] 4 discoverable (>=3 disyaratkan) memberi feedback proximity.
+- [x] Transisi `awakening -> discovery -> memories` via store + `PHASE_FLOW`.
+- [x] Checklist roadmap §2 Sprint 2 -> `[x]`, NEXT TASK dipindah ke Sprint 3.
+- [ ] `npm run dev` + 60fps tier high — **belum diverifikasi** (sandbox offline; jalankan di mesin Anda).
+
+**Catatan / risiko untuk sesi berikut:**
+- Sandbox offline: validasi sejauh ini = Prettier parse + grep pola React 19; tidak ada `npm install`/`next build`. Jalankan `npm run dev` untuk verifikasi runtime/fps.
+- SFX `/audio/discover.webm` opsional; aman bila belum ada (Howler tak crash).
+- Gerak vertikal sengaja gentle (`PLAYER.gravityScale` 0.35, hover di `floorY`); Sprint 4 membalik gravitasi via `Director` (sudah set `[0,9.81,0]` saat `impossible`) — clamp plafon (`ceilingY`) sudah disiapkan.
+- `PhaseManager` kini menampilkan `DiscoveryZone` sebagai placeholder untuk fase >= discovery; ganti cabang saat `MemoryZone` (Sprint 3) dibuat.
