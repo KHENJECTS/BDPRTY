@@ -3,7 +3,7 @@
 > File ini ditulis agar siapa pun (atau sesi AI berikutnya) bisa melanjutkan tanpa
 > menganalisis ulang project. Baca ini + `NEXT_TASK.md` lalu langsung lanjut.
 
-**Terakhir diperbarui:** akhir sesi Sprint 6 (Finale) — lihat §13. (Dependency di jalur React 19, §8.)
+**Terakhir diperbarui:** akhir sesi Sprint 7 (Polish & Perf) — **ROADMAP SELESAI**, lihat §14. (Dependency di jalur React 19, §8.)
 **Stack:** Next.js 15 · TS · R3F · three · drei · @react-three/postprocessing · GSAP · framer-motion · zustand · howler · GLSL.
 
 ---
@@ -29,7 +29,7 @@
 - [x] **Sprint 4 — Impossible**: gravity flip (sudah via `Director`) + kamera **RAIL** sinematik. `ImpossibleZone` menampilkan pulau yang "menggantung" tinggi (realm terbalik); kamera menyusuri spline `IMPOSSIBLE.railPoints` (`useCinematicRail` -> `railTarget`/`railLookAt`, dibaca `CameraDirector`) selama `railDuration`, lalu auto-advance `impossible -> revelation`. Lihat §11.
 - [x] **Sprint 5 — Revelation**: partikel "berhamburan → menyatu" jadi wajah sang peraya (`FaceParticles`, fallback prosedural aman-aset bila `.glb` belum ada) + kamera **RAIL** khidmat menyusuri `REVELATION.railPoints` (pola `ImpossibleZone`), lalu auto-advance `revelation -> finale`. Lihat §12.
 - [x] **Sprint 6 — Finale**: penutup hangat. `FinaleZone` mempertahankan wajah peraya (`FaceParticles`) + motes hangat; kamera **RAIL** menjauh perlahan lalu menahan (`PHASE_FLOW.finale.next === null` = AKHIR, tanpa `setPhase`). `FinaleOverlay` (DOM) menampilkan "selamat ulang tahun, {firstName}" dari `memories.json`. Lihat §13.
-- [ ] **Sprint 7 — Polish & Perf** ← NEXT TASK (lihat `NEXT_TASK.md`)
+- [x] **Sprint 7 — Polish & Perf**: bloom membesar saat klimaks (`revelation`/`finale`) untuk kesan cahaya mekar (alternatif godrays, tanpa GodRays sun-mesh & tanpa dependency baru); `DisintegrationFX` (fx partikel naik/luruh reusable, tier-gated) dipasang sebagai bara perayaan di `FinaleZone`. **Seluruh roadmap (Sprint 0–7) selesai.** Lihat §14.
 
 ## 3. Apa yang dikerjakan sesi ini
 
@@ -328,3 +328,28 @@ Verifikasi satu salinan React 19: `npm ls react react-dom` → harus **19.0.0** 
 - `celebrant.fullName`/`firstName` masih placeholder ("Nama"/"Nama Lengkap") di `memories.json`; overlay tetap rapi dengan teks placeholder — user mengisi nama nyata belakangan.
 - `FaceParticles` masih wajah prosedural (lihat §12) sampai `public/models/face-pointcloud.glb` disediakan.
 - Sprint 7 (Polish & Perf) tinggal pemolesan additif: godrays, `DisintegrationFX`, audit anggaran tier, penghalusan BLEND kamera — lihat `NEXT_TASK.md`. Tak ada lagi fitur alur yang tersisa.
+
+---
+
+## 14. Work log — Sprint 7 (Polish & Perf) — ROADMAP SELESAI
+
+**Hasil:** sprint pemolesan additif, tanpa fitur alur baru & tanpa dependency baru. Dengan ini **seluruh roadmap Sprint 0–7 selesai**: alur naratif 7 fase lengkap end-to-end + dipoles secara sinematik/performa.
+
+**File baru:**
+- `experience/fx/DisintegrationFX.tsx` — FX partikel "naik/luruh" reusable (disebut bible). Pola points + shaderMaterial seperti `ParticleField`: tiap titik punya `aSeed`/`aSpeed`, umur berulang (`fract`) menggerakkan drift naik (`uRise`) + ayun halus, fade hidup-mati via `vAlpha` (sinus umur), `AdditiveBlending` + soft-circle. Jumlah titik default mengikuti anggaran tier (`useQualityTier().moteCount`) agar `low` tetap ringan; bisa di-override via prop `count`. Per-frame hanya memutasi `uTime` (tanpa `setState`). Props: `{ color, area, rise, count }`.
+
+**Edit kecil (additif):**
+- `experience/fx/PostFX.tsx` — subscribe `phase`; saat `climax = phase === "revelation" || "finale"`, `Bloom.intensity` 1.2→1.9 & `luminanceThreshold` 0.6→0.45. Memberi kesan cahaya/godrays **mekar** di klimaks tanpa `GodRays` sun-mesh yang rapuh & tanpa dependency baru. `multisampling`/DoF tetap tier-gated (`heavy`).
+- `experience/world/zones/FinaleZone.tsx` — tambah `<DisintegrationFX color="#ffd9a0" area={22} rise={16} />` sebagai bara perayaan yang naik perlahan (1 baris + import). Tak mengubah logika rail/`next === null`.
+
+**Definition of Done Sprint 7:**
+- [x] Efek baru ter-gate per tier (`DisintegrationFX` ikut `moteCount`; DoF/multisampling tetap `heavy`-only) — tier `low` tidak terbebani.
+- [x] Tidak ada dependency baru; arsitektur & style dipertahankan (points+shader pola `ParticleField`; subscribe selektif zustand; per-frame mutate uniform).
+- [x] Roadmap §2 → Sprint 7 `[x]`; STATUS → semua ✅; `NEXT_TASK.md` → status "roadmap selesai" + backlog opsional.
+- [ ] `npm run dev` + 60fps tier high — **belum diverifikasi** (sandbox offline; jalankan di mesin Anda; profil bila bloom klimaks terasa berat di perangkat lemah).
+
+**Catatan / backlog (opsional, bukan blocker) — lihat `NEXT_TASK.md`:**
+- Aset nyata: `public/models/face-pointcloud.glb` (wajah), `.ktx2` foto kenangan, audio cue (howler/`useAudio`, hormati `audioUnlocked`), serta isi nama nyata di `memories.json` (langsung tampil di `FinaleOverlay`).
+- Godrays sun-shaft volumetrik sejati (saat ini didekati bloom klimaks) — bila ditambah, gating tier & TANPA dependency baru.
+- Tuning fps per-perangkat; profil `FaceParticles`/`DisintegrationFX`/`ParticleField`. `PerformanceMonitor` sudah menurunkan tier saat fps turun.
+- Invariant tetap: `PlayerController` early-return non-FREE; per-frame mutate ref/objek three (bukan `setState`); transient via `getState()`.

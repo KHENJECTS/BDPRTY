@@ -1,67 +1,48 @@
-# NEXT TASK — Sprint 7: Polish & Perf
+# NEXT TASK — 🎉 ROADMAP SELESAI (Sprint 0–7)
 
-> Mulai dari sini. Baca `HANDOFF.md` §1 (aturan), §2 (status), §4 (mental model),
-> §5 (catatan teknis), §9 (anggaran tier), dan §13 (apa yang baru dari Sprint 6)
-> dulu. Jangan analisis ulang seluruh project.
+> Seluruh roadmap inti sudah selesai. **Tidak ada NEXT TASK wajib.** Alur naratif
+> 7 fase lengkap end-to-end dan sudah dipoles (Sprint 7). Berkas ini kini berisi
+> **backlog opsional** — ambil hanya jika ingin meningkatkan kualitas; semuanya
+> additif & tidak memblokir rilis. Baca `HANDOFF.md` §1 (aturan) & §14 (Sprint 7)
+> sebelum mulai.
 
-## Konteks penting
+## Status
 
-**Alur naratif 7 fase kini LENGKAP end-to-end** (threshold → awakening → discovery
-→ memories → impossible → revelation → finale). Sprint 7 **bukan** menambah fase/
-fitur alur baru — ini sprint **pemolesan & performa**. Jangan redesign; semua
-perubahan harus additif & beralasan.
+| Sprint | Status |
+| --- | --- |
+| 0 Foundation → 6 Finale | ✅ Selesai |
+| 7 Polish & Perf | ✅ Selesai |
 
-## Tujuan Sprint 7 (§11 bible)
+Alur: threshold → awakening → discovery → memories → impossible → revelation → finale (`next: null`).
 
-Mengangkat kualitas sinematik & menjaga 60fps di tier `high`: efek penutup (godrays),
-disintegrasi/komposisi partikel, audit performa per-tier, dan penghalusan transisi.
+## Backlog opsional (urut perkiraan dampak)
 
-## Kandidat pekerjaan (pilih sesuai dampak; semua OPSIONAL & additif)
+1. **Aset nyata menggantikan placeholder prosedural**
+   - `public/models/face-pointcloud.glb` → ganti generator `home` di `FaceParticles`
+     (drei `useGLTF` + guard Suspense/fallback; fallback prosedural tetap aman bila aset hilang).
+   - Foto kenangan `.ktx2` (`public/textures/01.ktx2`, `02.ktx2`) untuk `MemoryZone`.
+   - Isi nama nyata di `public/data/memories.json` (`celebrant.fullName`/`firstName`)
+     — langsung muncul di `FinaleOverlay`.
+   - Audio (howler via `useAudio`): cue swell di `revelation`/`finale`; hormati `audioUnlocked`, aman-SSR.
 
-1. **Godrays / light shafts** (ditangguhkan dari sprint sebelumnya)
-   - Tambah di `fx/PostFX.tsx` bila `@react-three/postprocessing` sudah menyediakannya,
-     ATAU shader `experience/shaders/godrays/` (pola `skydome`). **Jangan tambah
-     dependency baru.** Aktifkan terutama di `revelation`/`finale`.
-   - Gating per tier (mis. hanya `high`/`ultra`) lewat `useQualityTier`.
+2. **Godrays / light-shaft shader sejati** (saat ini didekati bloom klimaks di `PostFX`)
+   - Bila ingin sinar matahari volumetrik: tambah di `fx/PostFX.tsx` bila tersedia di
+     `@react-three/postprocessing`, ATAU shader `experience/shaders/godrays/` (pola `skydome`).
+     **Jangan tambah dependency baru.** Gating tier (`high`/`ultra`) lewat `useQualityTier`.
 
-2. **DisintegrationFX** (disebut bible)
-   - Efek partikel "luruh/menyatu" yang reusable (pola `FaceParticles`/`ParticleField`).
-     Boleh dipakai saat transisi `impossible → revelation` agar perpindahan mulus.
+3. **Audit performa lanjut (§9)**
+   - Verifikasi 60fps tier `high` di perangkat target; profil partikel
+     (`FaceParticles` `max(1500, moteCount*3)`, `DisintegrationFX` `moteCount`, `ParticleField`).
+   - `PerformanceMonitor` (onDecline) sudah menurunkan tier; pastikan `low` mulus.
 
-3. **Audit performa & anggaran tier (§9)**
-   - Tinjau `hooks/useQualityTier.ts`: jumlah partikel (`moteCount`), `FaceParticles`
-     (`max(1500, moteCount*3)`), `IMPOSSIBLE.islands`, bloom. Pastikan tier `low`
-     turun mulus (sudah ada `PerformanceMonitor` onDecline di `Experience.tsx`).
-   - Verifikasi `AdaptiveDpr`/`AdaptiveEvents` & `frustumCulled` pada points besar.
+4. **Penghalusan transisi kamera (opsional)**
+   - `CameraDirector` damp `RAIL`/`BLEND` (lambda 0.25). Bila ada lonjakan saat FREE→RAIL
+     (mis. awal `impossible`), pertimbangkan ramp lambda; pakai `damp3` yang ada, jangan ubah arsitektur.
 
-4. **Penghalusan transisi kamera**
-   - Tinjau `BLEND` di `CameraDirector` saat pergantian FREE↔RAIL (mis. awal `impossible`)
-     agar tidak ada lonjakan. Pakai `damp3`/durasi yang ada; jangan ubah arsitektur.
+## Aturan yang tetap berlaku
 
-5. **Audio (howler)** — opsional
-   - Cue audio per fase (mis. swell di `revelation`/`finale`) via `useAudio` yang ada.
-     Aman-SSR; jangan autoplay tanpa `audioUnlocked`.
-
-## Definition of Done (sesuaikan dengan item yang dikerjakan)
-
-- Tiap efek baru ter-gate per tier & tidak menurunkan fps tier `high` (<60fps).
-- Tidak ada dependency baru; arsitektur & style dipertahankan.
-- `npm run dev` jalan tanpa error; transisi antar fase mulus.
-- Update `HANDOFF.md` §2 (Sprint 7 → `[x]`) + tambah §14 work log; update `STATUS.md`.
-  Bila ini sprint terakhir, tandai roadmap selesai & catat backlog sisa di NEXT_TASK.
-
-## File yang kemungkinan disentuh
-
-- `fx/PostFX.tsx`, `experience/shaders/godrays/*` (baru, bila dipilih),
-  `experience/fx/DisintegrationFX.tsx` (baru, bila dipilih), `hooks/useQualityTier.ts`,
-  `experience/camera/CameraDirector.tsx` (penghalusan BLEND), `lib/constants.ts`.
-- JANGAN sentuh: alur fase §3–§13 & kerja Sprint 0–6 kecuali pemolesan additif yang jelas.
-
-## Risiko / catatan
-
+- Additif saja; jangan redesign/refactor besar; pertahankan arsitektur & style.
+- Invariant: `PlayerController` early-return saat non-FREE; per-frame memutasi ref/objek
+  three (bukan `setState`); baca transient via `useExperienceStore.getState()`; `"use client"` di komponen client.
 - Sandbox offline: validasi statis saja (Prettier/jq); `npm run dev`/fps diuji di mesin Anda.
-- Godrays/postprocessing berat — WAJIB gating tier; uji `low` tidak drop.
-- `FaceParticles` masih wajah prosedural (lihat §12) sampai `public/models/face-pointcloud.glb`
-  disediakan; bila ditambah, pakai drei `useGLTF` + guard Suspense.
-- Jangan memecah invariant: `PlayerController` early-return saat non-FREE; per-frame
-  memutasi ref/objek three (bukan `setState`); baca transient via `getState()`.
+- Selesai mengerjakan butir backlog: perbarui `HANDOFF.md` (+work log) & `STATUS.md`.

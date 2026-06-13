@@ -9,7 +9,7 @@
 | 4 | Impossible (gravity flip, camera RAIL) | ✅ Selesai |
 | 5 | Revelation | ✅ Selesai |
 | 6 | Finale | ✅ Selesai |
-| 7 | Polish & Perf | ⏭️ NEXT TASK |
+| 7 | Polish & Perf | ✅ Selesai |
 
 **Verifikasi:** JSON valid (jq); seluruh src TS/TSX ter-parse Prettier tanpa error & diformat.
 
@@ -27,9 +27,12 @@
 
 **[Sprint 6] Finale — selesai:** `FinaleZone` (pola `RevelationZone`, tanpa transisi karena `next === null`) mempertahankan wajah peraya + motes hangat; kamera **RAIL** menjauh perlahan lalu menahan. `FinaleOverlay` (DOM, pola `DiegeticHints`) menampilkan pesan ulang tahun + `celebrant.firstName`. Semua 7 fase kini lengkap end-to-end. Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §13.
 
-**Lanjut di:** `NEXT_TASK.md` · **Konteks lengkap:** `HANDOFF.md`
+**[Sprint 7] Polish & Perf — selesai:** PostFX bloom membesar saat klimaks (`revelation`/`finale`) — kesan cahaya/godrays mekar tanpa GodRays sun-mesh & tanpa dependency baru, tetap tier-gated. `DisintegrationFX` (komponen fx partikel naik/luruh reusable, jumlah titik ikut anggaran tier `useQualityTier`) dipasang sebagai bara perayaan di `FinaleZone`. **Roadmap Sprint 0–7 SELESAI** — alur naratif lengkap + dipoles. Validasi statis OK (Prettier); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §14.
 
-## Ditangguhkan ke sprint berikut (jangan dianggap hilang)
+**Status proyek:** semua sprint selesai. Backlog opsional (aset nyata, godrays-shader, audio cue, tuning lanjut) tercatat di `NEXT_TASK.md`.
 
-Komponen ini disebut di bible namun memang baru relevan di Sprint 7 (Polish & Perf):
-shader `godrays`, `DisintegrationFX`.
+## Backlog opsional (di luar roadmap inti — bukan blocker)
+
+- `DisintegrationFX` — **SUDAH dibuat** (Sprint 7) & dipakai di `FinaleZone`.
+- shader `godrays` penuh — saat ini didekati lewat bloom klimaks; shader sun-shaft sejati opsional (lihat `NEXT_TASK.md`).
+- Aset nyata (`.glb` wajah, `.ktx2` foto, audio) & tuning fps per-perangkat — lihat `NEXT_TASK.md`.

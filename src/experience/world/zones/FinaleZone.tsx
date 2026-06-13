@@ -10,6 +10,7 @@ import {
 } from "@/experience/camera/useCinematicRail";
 import { FaceParticles } from "../props/FaceParticles";
 import { ParticleField } from "@/experience/fx/ParticleField";
+import { DisintegrationFX } from "@/experience/fx/DisintegrationFX";
 
 // Sprint 6 — Zona Finale: penutup hangat. Wajah peraya (`FaceParticles`) tetap
 // hadir sementara kamera RAIL menjauh perlahan lalu MENAHAN — `PHASE_FLOW.finale`
@@ -38,6 +39,8 @@ export function FinaleZone() {
     <group>
       <FaceParticles />
       <ParticleField color="#fff0d0" area={60} />
+      {/* Sprint 7: bara perayaan yang naik perlahan (additif, tier-gated) */}
+      <DisintegrationFX color="#ffd9a0" area={22} rise={16} />
     </group>
   );
 }
