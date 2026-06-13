@@ -1,0 +1,105 @@
+import type { Phase } from "@/state/useExperienceStore";
+
+export type PhaseVisual = {
+  background: string;
+  fogColor: string;
+  fogNear: number;
+  fogFar: number;
+  ambientColor: string;
+  ambientIntensity: number;
+  sunColor: string;
+  sunIntensity: number;
+};
+
+// Palet & mood lighting per fase (lihat §1.3 Bahasa Visual / Art Direction).
+// Nilai ini didamp oleh PhaseEnvironment untuk transisi mood yang halus.
+export const PHASE_VISUALS: Record<Phase, PhaseVisual> = {
+  threshold: {
+    background: "#000000",
+    fogColor: "#05060f",
+    fogNear: 5,
+    fogFar: 60,
+    ambientColor: "#1b2740",
+    ambientIntensity: 0.2,
+    sunColor: "#ffd9a0",
+    sunIntensity: 0.4,
+  },
+  awakening: {
+    background: "#070b1f",
+    fogColor: "#16203f",
+    fogNear: 8,
+    fogFar: 130,
+    ambientColor: "#2b3a66",
+    ambientIntensity: 0.6,
+    sunColor: "#ffcf8f",
+    sunIntensity: 1.4,
+  },
+  discovery: {
+    background: "#0a1622",
+    fogColor: "#234a4a",
+    fogNear: 14,
+    fogFar: 200,
+    ambientColor: "#3e6b63",
+    ambientIntensity: 0.85,
+    sunColor: "#ffe6b0",
+    sunIntensity: 1.9,
+  },
+  memories: {
+    background: "#1a0f1e",
+    fogColor: "#3a2030",
+    fogNear: 10,
+    fogFar: 150,
+    ambientColor: "#6b3f57",
+    ambientIntensity: 0.9,
+    sunColor: "#ffb27a",
+    sunIntensity: 1.3,
+  },
+  impossible: {
+    background: "#0a001a",
+    fogColor: "#1a0535",
+    fogNear: 6,
+    fogFar: 240,
+    ambientColor: "#3a1f7a",
+    ambientIntensity: 0.7,
+    sunColor: "#39f0ff",
+    sunIntensity: 1.6,
+  },
+  revelation: {
+    background: "#101018",
+    fogColor: "#2a2a40",
+    fogNear: 20,
+    fogFar: 400,
+    ambientColor: "#8888aa",
+    ambientIntensity: 1.2,
+    sunColor: "#ffffff",
+    sunIntensity: 2.2,
+  },
+  finale: {
+    background: "#fdf6e3",
+    fogColor: "#f5e6c8",
+    fogNear: 30,
+    fogFar: 500,
+    ambientColor: "#fff0d0",
+    ambientIntensity: 1.6,
+    sunColor: "#fff7e0",
+    sunIntensity: 2.6,
+  },
+};
+
+// Skydome (Awakening): gradient tiga-stop + arah matahari untuk god-glow.
+export const SKY = {
+  topColor: "#0a1a4f",
+  midColor: "#3a2e6e",
+  bottomColor: "#e6a45c",
+  sunColor: "#ffe7bd",
+  sunDir: [-0.4, 0.3, -0.85] as [number, number, number],
+};
+
+// Konstanta zona Awakening (Sprint 1).
+export const AWAKENING = {
+  islandPosition: [0, -2, -6] as [number, number, number],
+  cameraFloatAmplitude: 0.25,
+  cameraFloatSpeed: 0.35,
+  birdCount: 24,
+  moteCount: 600,
+};

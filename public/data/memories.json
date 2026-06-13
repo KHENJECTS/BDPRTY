@@ -1,0 +1,22 @@
+{
+  "celebrant": { "fullName": "Nama Lengkap", "firstName": "Nama" },
+  "faceModel": "/models/face-pointcloud.glb",
+  "memories": [
+    {
+      "id": "m1",
+      "photo": "/textures/memories/01.ktx2",
+      "caption": "Tempat pertama kita tertawa lepas.",
+      "date": "2021-08-12",
+      "placement": "tree",
+      "position": [12, 8, -4]
+    },
+    {
+      "id": "m2",
+      "photo": "/textures/memories/02.ktx2",
+      "caption": "Malam paling tenang.",
+      "date": "2022-02-03",
+      "placement": "constellation",
+      "position": [-20, 40, -60]
+    }
+  ]
+}
