@@ -7,11 +7,11 @@
 | 2 | Player & Discovery | ✅ Selesai |
 | 3 | Memories | ✅ Selesai |
 | 4 | Impossible (gravity flip, camera RAIL) | ✅ Selesai |
-| 5 | Revelation | ⏭️ NEXT TASK |
-| 6 | Finale | ⬛ Belum |
+| 5 | Revelation | ✅ Selesai |
+| 6 | Finale | ⏭️ NEXT TASK |
 | 7 | Polish & Perf | ⬛ Belum |
 
-**Verifikasi:** JSON valid (jq); 36 file TS/TSX/CSS/mjs ter-parse Prettier tanpa error & diformat.
+**Verifikasi:** JSON valid (jq); seluruh src TS/TSX ter-parse Prettier tanpa error & diformat.
 
 **[Sesi 2] Fix dependency:** runtime error `ReactCurrentOwner` (R3F v8 di atas React 19) — sempat diperbaiki dengan pin React 18.3.1 + `overrides`. **Digantikan oleh Sesi 3.**
 
@@ -23,10 +23,11 @@
 
 **[Sprint 4] Impossible — selesai:** `ImpossibleZone` (realm terbalik, pulau menggantung) + kamera **RAIL** sinematik (`useCinematicRail` spline -> `CameraDirector` damp3). Gravity flip via `Director`. Auto-advance `impossible→revelation` di akhir rail. Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §11.
 
+**[Sprint 5] Revelation — selesai:** `RevelationZone` (pola `ImpossibleZone`) + `FaceParticles`: partikel berhamburan -> menyatu jadi wajah (fallback prosedural aman-aset; `.glb` belum wajib) diiringi kamera **RAIL** khidmat; auto-advance `revelation→finale`. Gravity normal di fase ini. Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §12.
+
 **Lanjut di:** `NEXT_TASK.md` · **Konteks lengkap:** `HANDOFF.md`
 
 ## Ditangguhkan ke sprint berikut (jangan dianggap hilang)
 
-Komponen ini disebut di bible namun memang baru relevan di Sprint 5–6:
-`ui/FinaleOverlay.tsx`, shader `godrays`, zona `Revelation|Finale`,
-`DisintegrationFX`, `FaceParticles`.
+Komponen ini disebut di bible namun memang baru relevan di Sprint 6:
+`ui/FinaleOverlay.tsx`, shader `godrays`, zona `Finale`, `DisintegrationFX`.

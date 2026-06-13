@@ -3,7 +3,7 @@
 > File ini ditulis agar siapa pun (atau sesi AI berikutnya) bisa melanjutkan tanpa
 > menganalisis ulang project. Baca ini + `NEXT_TASK.md` lalu langsung lanjut.
 
-**Terakhir diperbarui:** akhir sesi Sprint 4 (Impossible) — lihat §11. (Dependency di jalur React 19, §8.)
+**Terakhir diperbarui:** akhir sesi Sprint 5 (Revelation) — lihat §12. (Dependency di jalur React 19, §8.)
 **Stack:** Next.js 15 · TS · R3F · three · drei · @react-three/postprocessing · GSAP · framer-motion · zustand · howler · GLSL.
 
 ---
@@ -27,8 +27,8 @@
 - [x] **Sprint 2 — Player & Discovery**: player FREE (WASD + look + lari + lompat) via `useCharacterMovement`, sadar-gravity; `DiscoveryZone` + orb `Discoverable` (proximity highlight/SFX); transisi `awakening → discovery` (auto via minDuration) lalu `discovery → memories` (saat cukup orb ditemukan). Lihat §9.
 - [x] **Sprint 3 — Memories**: `MemoryZone` membaca `public/data/memories.json`; portal shader (`memoryPortal/frag.glsl`) per kenangan + foto melayang (billboard, placeholder prosedural aman-aset) + dekor ambient (pohon / konstelasi sesuai `placement`). Mendekati portal membuka kenangan (`setActiveMemory`); setelah semua kenangan dibuka -> transisi `memories → impossible`. Lihat §10.
 - [x] **Sprint 4 — Impossible**: gravity flip (sudah via `Director`) + kamera **RAIL** sinematik. `ImpossibleZone` menampilkan pulau yang "menggantung" tinggi (realm terbalik); kamera menyusuri spline `IMPOSSIBLE.railPoints` (`useCinematicRail` -> `railTarget`/`railLookAt`, dibaca `CameraDirector`) selama `railDuration`, lalu auto-advance `impossible -> revelation`. Lihat §11.
-- [ ] **Sprint 5 — Revelation** ← NEXT TASK (lihat `NEXT_TASK.md`)
-- [ ] **Sprint 6 — Finale**
+- [x] **Sprint 5 — Revelation**: partikel "berhamburan → menyatu" jadi wajah sang peraya (`FaceParticles`, fallback prosedural aman-aset bila `.glb` belum ada) + kamera **RAIL** khidmat menyusuri `REVELATION.railPoints` (pola `ImpossibleZone`), lalu auto-advance `revelation -> finale`. Lihat §12.
+- [ ] **Sprint 6 — Finale** ← NEXT TASK (lihat `NEXT_TASK.md`)
 - [ ] **Sprint 7 — Polish & Perf**
 
 ## 3. Apa yang dikerjakan sesi ini
@@ -273,3 +273,30 @@ Verifikasi satu salinan React 19: `npm ls react react-dom` → harus **19.0.0** 
 - `railDuration` (18s) menentukan kecepatan tur kamera; sesuaikan bila terasa lambat/cepat. `IMPOSSIBLE.railPoints`/`lookAt` bisa di-tweak untuk komposisi.
 - Saat RAIL, `PlayerController` early-return (`cameraMode !== "FREE"`), jadi tidak ada konflik kontrol kamera. Pertahankan invariant itu di sprint sinematik berikutnya.
 - Gravitasi hanya terbalik di `impossible`; `Director` mengembalikan `[0,-9.81,0]` di fase lain (termasuk `revelation`) — pertimbangkan saat membangun Revelation.
+
+---
+
+## 12. Work log — Sprint 5 (Revelation)
+
+**Hasil:** fase `revelation` kini punya zona & kamera sinematik sendiri (tidak lagi placeholder `MemoryZone`). Saat `ImpossibleZone` memicu `setPhase("revelation")`: `usePhaseTimeline` menyetel cameraMode `RAIL`, `Director` mengembalikan gravitasi normal `[0,-9.81,0]`, dan `RevelationZone` mengambil alih kamera + menampilkan wajah sang peraya yang terbentuk dari partikel, lalu menuntun ke `finale`.
+
+**File baru:**
+- `experience/world/props/FaceParticles.tsx` — point-cloud wajah. Tiap titik beranimasi "berhamburan -> menyatu" (`uProgress` digerakkan `elapsed`/`assembleDuration`, easing cubic + `aDelay` per-titik). Shader points (vert/frag inline) pola `ParticleField`: additive blending, soft circle, `gl_PointSize` per-jarak. **Fallback aman-aset**: selama `memories.json.faceModel` (.glb) belum ada / loader offline, `home` di-generate prosedural (kepala ellipsoid condong ke depan + rongga mata & mulut sebagai negative space) sehingga terbaca sebagai wajah. Jumlah titik ikut tier (`useQualityTier`, `max(1500, moteCount*3)`). Saat `.glb` tersedia, ganti generator `home` dengan sampling vertex model (drei `useGLTF` + guard) — pipeline shader tak perlu berubah.
+- `experience/world/zones/RevelationZone.tsx` — pola `ImpossibleZone`: `useCinematicRail(REVELATION.railPoints)`; di `useFrame` (hanya saat `phase === "revelation"`) set `railLookAt`, majukan `elapsed`, `sample(t)` menulis `railTarget`, dan saat `t >= 1` panggil `setPhase(PHASE_FLOW.revelation.next)` (= `finale`) sekali (guard ref). Merender `<FaceParticles />`. Tanpa setState di loop.
+
+**Edit kecil (additif):**
+- `experience/phases/PhaseManager.tsx` — tambah cabang `revelation -> RevelationZone`; kini hanya `finale` yang memakai `MemoryZone` sebagai placeholder.
+- `lib/constants.ts` — tambah `REVELATION` (`facePosition`, `faceScale`, `assembleDuration` 7s, `railPoints` spline, `lookAt`, `railDuration` 20s). `PHASE_VISUALS.revelation` SUDAH ada (putih terang) — tidak diubah.
+
+**Definition of Done Sprint 5:**
+- [x] `phase === "revelation"` menampilkan `RevelationZone`; wajah tersingkap via fallback prosedural elegan (`.glb` belum wajib).
+- [x] Kamera RAIL bergerak sinematik tanpa input pemain (`PlayerController` early-return saat non-FREE).
+- [x] Transisi `revelation -> finale` via store + `PHASE_FLOW` (di akhir rail).
+- [x] Checklist §2 Sprint 5 -> `[x]`; NEXT TASK dipindah ke Sprint 6 (Finale).
+- [ ] `npm run dev` + 60fps tier high — **belum diverifikasi** (sandbox offline; jalankan di mesin Anda).
+
+**Catatan / risiko untuk sesi berikut:**
+- Risiko §11 soal "`revelation` masih placeholder" kini **teratasi**; hanya `finale` yang tersisa sebagai placeholder `MemoryZone` (RAIL di `PHASE_FLOW`, `next: null`). Sprint 6 harus menambah `FinaleZone` ber-rail + overlay penutup (`ui/FinaleOverlay.tsx` masih ditangguhkan) — jika tidak, `finale` akan diam.
+- Wajah saat ini **prosedural** (kepala ellipsoid + rongga mata/mulut), bukan wajah peraya sebenarnya. Untuk wajah asli: sediakan `public/models/face-pointcloud.glb` lalu ganti generator `home` di `FaceParticles` (drei `useGLTF` + guard Suspense/fallback).
+- `assembleDuration` (7s) < `railDuration` (20s): wajah selesai menyatu sebelum kamera tiba dekat — sesuaikan bila ingin sinkron berbeda. `REVELATION.railPoints`/`lookAt`/`facePosition` bisa di-tweak untuk komposisi.
+- Gravitasi normal di `revelation`; bila ingin efek melayang khusus, atur di zona, jangan ubah `Director` global.

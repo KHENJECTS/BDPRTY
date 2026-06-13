@@ -172,3 +172,19 @@ export const IMPOSSIBLE = {
     { pos: [4, 34, 4], scale: 1.4, seed: 44 },
   ] as Array<{ pos: [number, number, number]; scale: number; seed: number }>,
 };
+
+// Konstanta zona Revelation (Sprint 5) — point-cloud wajah + rail kamera khidmat.
+export const REVELATION = {
+  facePosition: [0, 6, -10] as [number, number, number], // pusat wajah di dunia
+  faceScale: 5, // skala kepala ellipsoid (unit -> dunia)
+  assembleDuration: 7, // detik: partikel berhamburan -> menyatu jadi wajah
+  // Rail kamera mendekati wajah dengan khidmat (dari jauh -> dekat).
+  railPoints: [
+    [0, 7, 26],
+    [6, 8, 16],
+    [-4, 7, 9],
+    [0, 6, 3],
+  ] as Array<[number, number, number]>,
+  lookAt: [0, 6, -10] as [number, number, number], // selalu menatap wajah
+  railDuration: 20, // detik menempuh rail sebelum auto-advance ke 'finale'
+};
