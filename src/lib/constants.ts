@@ -188,3 +188,16 @@ export const REVELATION = {
   lookAt: [0, 6, -10] as [number, number, number], // selalu menatap wajah
   railDuration: 20, // detik menempuh rail sebelum auto-advance ke 'finale'
 };
+
+// Konstanta zona Finale (Sprint 6) — kamera penutup yang menenangkan.
+export const FINALE = {
+  // Kamera menjauh perlahan dari wajah peraya lalu menahan (akhir perjalanan).
+  railPoints: [
+    [0, 6, 3],
+    [0, 7, 9],
+    [2, 9, 16],
+    [0, 11, 24],
+  ] as Array<[number, number, number]>,
+  lookAt: [0, 6, -10] as [number, number, number], // tetap menatap wajah peraya
+  railDuration: 16, // detik; sesudahnya kamera ditahan (next === null = AKHIR)
+};

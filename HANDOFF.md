@@ -3,7 +3,7 @@
 > File ini ditulis agar siapa pun (atau sesi AI berikutnya) bisa melanjutkan tanpa
 > menganalisis ulang project. Baca ini + `NEXT_TASK.md` lalu langsung lanjut.
 
-**Terakhir diperbarui:** akhir sesi Sprint 5 (Revelation) — lihat §12. (Dependency di jalur React 19, §8.)
+**Terakhir diperbarui:** akhir sesi Sprint 6 (Finale) — lihat §13. (Dependency di jalur React 19, §8.)
 **Stack:** Next.js 15 · TS · R3F · three · drei · @react-three/postprocessing · GSAP · framer-motion · zustand · howler · GLSL.
 
 ---
@@ -28,8 +28,8 @@
 - [x] **Sprint 3 — Memories**: `MemoryZone` membaca `public/data/memories.json`; portal shader (`memoryPortal/frag.glsl`) per kenangan + foto melayang (billboard, placeholder prosedural aman-aset) + dekor ambient (pohon / konstelasi sesuai `placement`). Mendekati portal membuka kenangan (`setActiveMemory`); setelah semua kenangan dibuka -> transisi `memories → impossible`. Lihat §10.
 - [x] **Sprint 4 — Impossible**: gravity flip (sudah via `Director`) + kamera **RAIL** sinematik. `ImpossibleZone` menampilkan pulau yang "menggantung" tinggi (realm terbalik); kamera menyusuri spline `IMPOSSIBLE.railPoints` (`useCinematicRail` -> `railTarget`/`railLookAt`, dibaca `CameraDirector`) selama `railDuration`, lalu auto-advance `impossible -> revelation`. Lihat §11.
 - [x] **Sprint 5 — Revelation**: partikel "berhamburan → menyatu" jadi wajah sang peraya (`FaceParticles`, fallback prosedural aman-aset bila `.glb` belum ada) + kamera **RAIL** khidmat menyusuri `REVELATION.railPoints` (pola `ImpossibleZone`), lalu auto-advance `revelation -> finale`. Lihat §12.
-- [ ] **Sprint 6 — Finale** ← NEXT TASK (lihat `NEXT_TASK.md`)
-- [ ] **Sprint 7 — Polish & Perf**
+- [x] **Sprint 6 — Finale**: penutup hangat. `FinaleZone` mempertahankan wajah peraya (`FaceParticles`) + motes hangat; kamera **RAIL** menjauh perlahan lalu menahan (`PHASE_FLOW.finale.next === null` = AKHIR, tanpa `setPhase`). `FinaleOverlay` (DOM) menampilkan "selamat ulang tahun, {firstName}" dari `memories.json`. Lihat §13.
+- [ ] **Sprint 7 — Polish & Perf** ← NEXT TASK (lihat `NEXT_TASK.md`)
 
 ## 3. Apa yang dikerjakan sesi ini
 
@@ -300,3 +300,31 @@ Verifikasi satu salinan React 19: `npm ls react react-dom` → harus **19.0.0** 
 - Wajah saat ini **prosedural** (kepala ellipsoid + rongga mata/mulut), bukan wajah peraya sebenarnya. Untuk wajah asli: sediakan `public/models/face-pointcloud.glb` lalu ganti generator `home` di `FaceParticles` (drei `useGLTF` + guard Suspense/fallback).
 - `assembleDuration` (7s) < `railDuration` (20s): wajah selesai menyatu sebelum kamera tiba dekat — sesuaikan bila ingin sinkron berbeda. `REVELATION.railPoints`/`lookAt`/`facePosition` bisa di-tweak untuk komposisi.
 - Gravitasi normal di `revelation`; bila ingin efek melayang khusus, atur di zona, jangan ubah `Director` global.
+
+---
+
+## 13. Work log — Sprint 6 (Finale)
+
+**Hasil:** fase `finale` kini punya zona + overlay penutup sendiri — **alur 7 fase lengkap end-to-end** (threshold → awakening → discovery → memories → impossible → revelation → finale). Saat `RevelationZone` memicu `setPhase("finale")`: cameraMode tetap `RAIL`, `Director` menjaga gravitasi normal, `FinaleZone` mempertahankan wajah peraya & menggerakkan kamera menjauh perlahan lalu menahan, dan `FinaleOverlay` (DOM) memunculkan pesan ulang tahun. `PHASE_FLOW.finale.next === null` — ini akhir, tanpa transisi lanjut.
+
+**File baru:**
+- `experience/world/zones/FinaleZone.tsx` — pola `RevelationZone` MINUS transisi fase. `useCinematicRail(FINALE.railPoints)`; di `useFrame` (hanya saat `phase === "finale"`) set `railLookAt`, majukan `elapsed`, `sample(t)` menulis `railTarget`. Karena `next === null`, **tidak ada `setPhase`**; saat `t === 1` kamera ditahan di titik akhir (`sample(1)` idempoten). Merender `<FaceParticles />` (wajah peraya tetap hadir) + `<ParticleField color="#fff0d0" area={60} />` (motes hangat). Tanpa setState di loop, tanpa dependency baru.
+- `ui/FinaleOverlay.tsx` — overlay DOM (di luar Canvas, pola `DiegeticHints`). Subscribe `phase`; saat `phase === "finale"` menampilkan "selamat ulang tahun, {firstName}" + subjudul, fade-in bertahap via framer-motion (variants di-extract jadi const). Nama dari `useMemories().data.celebrant.firstName` (fallback string kosong bila data belum tiba). `pointer-events-none` agar tak mengganggu scene.
+
+**Edit kecil (additif):**
+- `experience/phases/PhaseManager.tsx` — tambah cabang `finale -> FinaleZone`. Tidak ada lagi fase yang memakai `MemoryZone` sebagai placeholder (fallback terakhir tetap ada sebagai jaring pengaman).
+- `experience/Experience.tsx` — mount `<FinaleOverlay />` di area DOM overlay (1 baris + import, bergaya seperti `<DiegeticHints />`). Bukan refactor.
+- `lib/constants.ts` — tambah `FINALE` (`railPoints` menjauh dari wajah, `lookAt`, `railDuration` 16s). `PHASE_VISUALS.finale` SUDAH ada (emas hangat) — tidak diubah.
+
+**Definition of Done Sprint 6:**
+- [x] `phase === "finale"` menampilkan `FinaleZone` + `FinaleOverlay` dengan nama peraya.
+- [x] Kamera RAIL bergerak sinematik tanpa input pemain; menahan di akhir (tanpa transisi).
+- [x] Tidak ada fase yang lagi memakai `MemoryZone` sebagai placeholder.
+- [x] Checklist §2 Sprint 6 -> `[x]`; NEXT TASK dipindah ke Sprint 7 (Polish & Perf).
+- [ ] `npm run dev` + 60fps tier high — **belum diverifikasi** (sandbox offline; jalankan di mesin Anda).
+
+**Catatan / risiko untuk sesi berikut:**
+- `finale` adalah akhir (`next: null`): JANGAN menambah `setPhase` di akhir rail — akan memutus/looping fase. Bila ingin pengulangan lembut, biarkan kamera menahan (perilaku sekarang) atau loop di dalam zona.
+- `celebrant.fullName`/`firstName` masih placeholder ("Nama"/"Nama Lengkap") di `memories.json`; overlay tetap rapi dengan teks placeholder — user mengisi nama nyata belakangan.
+- `FaceParticles` masih wajah prosedural (lihat §12) sampai `public/models/face-pointcloud.glb` disediakan.
+- Sprint 7 (Polish & Perf) tinggal pemolesan additif: godrays, `DisintegrationFX`, audit anggaran tier, penghalusan BLEND kamera — lihat `NEXT_TASK.md`. Tak ada lagi fitur alur yang tersisa.

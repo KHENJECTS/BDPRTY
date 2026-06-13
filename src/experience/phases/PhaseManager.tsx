@@ -6,6 +6,7 @@ import { DiscoveryZone } from "../world/zones/DiscoveryZone";
 import { MemoryZone } from "../world/zones/MemoryZone";
 import { ImpossibleZone } from "../world/zones/ImpossibleZone";
 import { RevelationZone } from "../world/zones/RevelationZone";
+import { FinaleZone } from "../world/zones/FinaleZone";
 
 // Memetakan phase -> zona aktif. Subscribe selektif (hanya slice `phase`) agar
 // re-render minimal; zona ditukar saat fase berubah.
@@ -32,6 +33,9 @@ export function PhaseManager() {
   if (phase === "revelation") {
     return <RevelationZone />;
   }
-  // finale (Sprint 6) belum dibuat: MemoryZone sbg placeholder.
+  if (phase === "finale") {
+    return <FinaleZone />;
+  }
+  // fallback aman (semua fase kini punya zona): MemoryZone.
   return <MemoryZone />;
 }

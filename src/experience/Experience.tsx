@@ -13,6 +13,7 @@ import { PostFX } from "./fx/PostFX";
 import { Threshold } from "@/ui/Threshold";
 import { LoaderBreath } from "@/ui/LoaderBreath";
 import { DiegeticHints } from "@/ui/DiegeticHints";
+import { FinaleOverlay } from "@/ui/FinaleOverlay";
 import { useExperienceStore } from "@/state/useExperienceStore";
 
 export function Experience() {
@@ -56,6 +57,8 @@ export function Experience() {
       <Threshold />
       {/* Sprint 1: hint gerak diegetik yang muncul-hilang di awal Awakening */}
       <DiegeticHints />
+      {/* Sprint 6: pesan penutup + nama peraya, muncul saat phase === "finale" */}
+      <FinaleOverlay />
     </>
   );
 }

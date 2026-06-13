@@ -8,8 +8,8 @@
 | 3 | Memories | ✅ Selesai |
 | 4 | Impossible (gravity flip, camera RAIL) | ✅ Selesai |
 | 5 | Revelation | ✅ Selesai |
-| 6 | Finale | ⏭️ NEXT TASK |
-| 7 | Polish & Perf | ⬛ Belum |
+| 6 | Finale | ✅ Selesai |
+| 7 | Polish & Perf | ⏭️ NEXT TASK |
 
 **Verifikasi:** JSON valid (jq); seluruh src TS/TSX ter-parse Prettier tanpa error & diformat.
 
@@ -25,9 +25,11 @@
 
 **[Sprint 5] Revelation — selesai:** `RevelationZone` (pola `ImpossibleZone`) + `FaceParticles`: partikel berhamburan -> menyatu jadi wajah (fallback prosedural aman-aset; `.glb` belum wajib) diiringi kamera **RAIL** khidmat; auto-advance `revelation→finale`. Gravity normal di fase ini. Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §12.
 
+**[Sprint 6] Finale — selesai:** `FinaleZone` (pola `RevelationZone`, tanpa transisi karena `next === null`) mempertahankan wajah peraya + motes hangat; kamera **RAIL** menjauh perlahan lalu menahan. `FinaleOverlay` (DOM, pola `DiegeticHints`) menampilkan pesan ulang tahun + `celebrant.firstName`. Semua 7 fase kini lengkap end-to-end. Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §13.
+
 **Lanjut di:** `NEXT_TASK.md` · **Konteks lengkap:** `HANDOFF.md`
 
 ## Ditangguhkan ke sprint berikut (jangan dianggap hilang)
 
-Komponen ini disebut di bible namun memang baru relevan di Sprint 6:
-`ui/FinaleOverlay.tsx`, shader `godrays`, zona `Finale`, `DisintegrationFX`.
+Komponen ini disebut di bible namun memang baru relevan di Sprint 7 (Polish & Perf):
+shader `godrays`, `DisintegrationFX`.
