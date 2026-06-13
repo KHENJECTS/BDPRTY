@@ -54,7 +54,13 @@ export function MemoryPortal({ id, position, onOpen }: MemoryPortalProps) {
     m.uniforms.uTime.value += dt;
     g.rotation.y += dt * 0.2;
 
-    const dist = camera.position.distanceTo(basePos);
+    // Portal melayang tinggi (posisi dari memories.json), sedangkan player
+    // mengambang di dekat tanah. Pakai jarak HORIZONTAL (bidang XZ, abaikan Y)
+    // agar kenangan bisa dibuka dengan berjalan di bawah/dekat portal -- tanpa
+    // memindahkan portal atau mengubah desain melayangnya.
+    const dx = camera.position.x - basePos.x;
+    const dz = camera.position.z - basePos.z;
+    const dist = Math.hypot(dx, dz);
     const near = THREE.MathUtils.clamp(
       1 - (dist - MEMORY.openRadius) / (MEMORY.glowRadius - MEMORY.openRadius),
       0,

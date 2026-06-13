@@ -241,5 +241,6 @@ Verifikasi satu salinan React 19: `npm ls react react-dom` → harus **19.0.0** 
 **Catatan / risiko untuk sesi berikut:**
 - Foto kenangan di `memories.json` menunjuk `.ktx2` (mis. `/textures/memories/01.ktx2`) yang mungkin belum ada; komponen sengaja memakai placeholder prosedural. Untuk foto nyata `.ktx2`, perlu `KTX2Loader` + transcoder basis (mis. drei `useKTX2`), tambahkan saat aset tersedia — JANGAN paksakan loader sekarang (offline, bisa crash).
 - `requiredRatio: 1` artinya SEMUA kenangan harus dibuka untuk lanjut ke `impossible`. Turunkan bila ingin lebih longgar.
+- **Trigger buka kenangan memakai jarak HORIZONTAL (XZ)**, bukan jarak 3D. Alasan: portal di `memories.json` melayang tinggi (mis. `m1` y=8, `m2` y=40) sedangkan player mengambang di dekat tanah (`floorY` 1.8) -> jarak 3D tak pernah <= `openRadius` -> soft-lock. Dengan XZ, cukup berjalan di bawah/dekat portal. Bila Sprint 4+ menambah mode terbang/RAIL melewati portal, pertimbangkan kembali ke jarak 3D.
 - `MemoryZone` kini juga jadi placeholder untuk fase `impossible`/`revelation`/`finale` sampai zona Sprint 4–6 dibuat (lihat `PhaseManager`).
 - Mode tetap FREE (`PHASE_FLOW.memories`); player Sprint 2 tetap aktif menjelajah.
