@@ -4,6 +4,7 @@ import { useExperienceStore } from "@/state/useExperienceStore";
 import { AwakeningZone } from "../world/zones/AwakeningZone";
 import { DiscoveryZone } from "../world/zones/DiscoveryZone";
 import { MemoryZone } from "../world/zones/MemoryZone";
+import { ImpossibleZone } from "../world/zones/ImpossibleZone";
 
 // Memetakan phase -> zona aktif. Subscribe selektif (hanya slice `phase`) agar
 // re-render minimal; zona ditukar saat fase berubah.
@@ -21,5 +22,12 @@ export function PhaseManager() {
   if (phase === "discovery") {
     return <DiscoveryZone />;
   }
+  if (phase === "memories") {
+    return <MemoryZone />;
+  }
+  if (phase === "impossible") {
+    return <ImpossibleZone />;
+  }
+  // revelation & finale (Sprint 5–6) belum dibuat: MemoryZone sbg placeholder.
   return <MemoryZone />;
 }

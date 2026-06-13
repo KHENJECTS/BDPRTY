@@ -6,8 +6,8 @@
 | 1 | Awakening (sky, fog, pulau, burung, awan, motes, audio, kamera FREE) | ✅ Selesai |
 | 2 | Player & Discovery | ✅ Selesai |
 | 3 | Memories | ✅ Selesai |
-| 4 | Impossible (gravity flip, camera RAIL) | ⏭️ NEXT TASK |
-| 5 | Revelation | ⬛ Belum |
+| 4 | Impossible (gravity flip, camera RAIL) | ✅ Selesai |
+| 5 | Revelation | ⏭️ NEXT TASK |
 | 6 | Finale | ⬛ Belum |
 | 7 | Polish & Perf | ⬛ Belum |
 
@@ -21,10 +21,12 @@
 
 **[Sprint 3] Memories — selesai:** `MemoryZone` membaca `memories.json`; portal shader (`memoryPortal/frag.glsl`) per kenangan + foto melayang (billboard, placeholder prosedural aman-aset) + dekor ambient (pohon/konstelasi). Mendekat -> `setActiveMemory`; semua kenangan dibuka -> transisi `memories→impossible`. Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §10.
 
+**[Sprint 4] Impossible — selesai:** `ImpossibleZone` (realm terbalik, pulau menggantung) + kamera **RAIL** sinematik (`useCinematicRail` spline -> `CameraDirector` damp3). Gravity flip via `Director`. Auto-advance `impossible→revelation` di akhir rail. Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §11.
+
 **Lanjut di:** `NEXT_TASK.md` · **Konteks lengkap:** `HANDOFF.md`
 
 ## Ditangguhkan ke sprint berikut (jangan dianggap hilang)
 
-Komponen ini disebut di bible namun memang baru relevan di Sprint 4–6:
-`ui/FinaleOverlay.tsx`, shader `godrays`, zona `Impossible|Revelation|Finale`,
+Komponen ini disebut di bible namun memang baru relevan di Sprint 5–6:
+`ui/FinaleOverlay.tsx`, shader `godrays`, zona `Revelation|Finale`,
 `DisintegrationFX`, `FaceParticles`.

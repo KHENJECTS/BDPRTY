@@ -3,7 +3,7 @@
 > File ini ditulis agar siapa pun (atau sesi AI berikutnya) bisa melanjutkan tanpa
 > menganalisis ulang project. Baca ini + `NEXT_TASK.md` lalu langsung lanjut.
 
-**Terakhir diperbarui:** akhir sesi Sprint 3 (Memories) — lihat §10. (Dependency di jalur React 19, §8.)
+**Terakhir diperbarui:** akhir sesi Sprint 4 (Impossible) — lihat §11. (Dependency di jalur React 19, §8.)
 **Stack:** Next.js 15 · TS · R3F · three · drei · @react-three/postprocessing · GSAP · framer-motion · zustand · howler · GLSL.
 
 ---
@@ -26,8 +26,8 @@
 - [x] **Sprint 1 — Awakening**: skydome shader, fog volumetric (damped), pulau terapung, burung cahaya, awan parallax, motes, ambient audio, kamera floating (FREE), hint diegetik. **Mood lock tercapai.**
 - [x] **Sprint 2 — Player & Discovery**: player FREE (WASD + look + lari + lompat) via `useCharacterMovement`, sadar-gravity; `DiscoveryZone` + orb `Discoverable` (proximity highlight/SFX); transisi `awakening → discovery` (auto via minDuration) lalu `discovery → memories` (saat cukup orb ditemukan). Lihat §9.
 - [x] **Sprint 3 — Memories**: `MemoryZone` membaca `public/data/memories.json`; portal shader (`memoryPortal/frag.glsl`) per kenangan + foto melayang (billboard, placeholder prosedural aman-aset) + dekor ambient (pohon / konstelasi sesuai `placement`). Mendekati portal membuka kenangan (`setActiveMemory`); setelah semua kenangan dibuka -> transisi `memories → impossible`. Lihat §10.
-- [ ] **Sprint 4 — Impossible** (gravity flip, camera RAIL/GSAP) ← NEXT TASK (lihat `NEXT_TASK.md`)
-- [ ] **Sprint 5 — Revelation**
+- [x] **Sprint 4 — Impossible**: gravity flip (sudah via `Director`) + kamera **RAIL** sinematik. `ImpossibleZone` menampilkan pulau yang "menggantung" tinggi (realm terbalik); kamera menyusuri spline `IMPOSSIBLE.railPoints` (`useCinematicRail` -> `railTarget`/`railLookAt`, dibaca `CameraDirector`) selama `railDuration`, lalu auto-advance `impossible -> revelation`. Lihat §11.
+- [ ] **Sprint 5 — Revelation** ← NEXT TASK (lihat `NEXT_TASK.md`)
 - [ ] **Sprint 6 — Finale**
 - [ ] **Sprint 7 — Polish & Perf**
 
@@ -82,7 +82,7 @@ Bukan refactor/redesign.
 `PlayerController` (Sprint 2) menggerakkan kamera saat `cameraMode === "FREE"`
 memakai `useCharacterMovement` (WASD + pointer-lock look + Shift lari + Space
 lompat), memutasi posisi via ref dan menghormati `gravity` store. `PhaseManager`
-memilih zona: `threshold/awakening` -> `AwakeningZone`, `discovery` -> `DiscoveryZone`, selebihnya (>= `memories`) -> `MemoryZone`.
+memilih zona: `threshold/awakening` -> `AwakeningZone`, `discovery` -> `DiscoveryZone`, `memories` -> `MemoryZone`, `impossible` -> `ImpossibleZone`; `revelation`/`finale` masih placeholder `MemoryZone`.
 
 Flow fase: mulai di `threshold` -> klik tombol "tarik napas" (`Threshold.tsx`)
 meng-unlock audio + pointer lock + set phase `awakening`. `usePhaseTimeline`
@@ -90,7 +90,7 @@ menyalakan jam global, meng-set cameraMode per `PHASE_FLOW`, dan auto-advance
 fase ber-`minDuration` (`awakening` 8s -> `discovery`). Dari `discovery`,
 mendekati cukup orb `Discoverable` memicu `setPhase("memories")`. Di `memories`,
 `MemoryZone` menampilkan portal kenangan; mendekati portal membuka kenangan
-(`setActiveMemory`) dan setelah semua kenangan dibuka memicu `setPhase("impossible")`.
+(`setActiveMemory`) dan setelah semua kenangan dibuka memicu `setPhase("impossible")`. Di `impossible`, `Director` membalik gravitasi (`[0,9.81,0]`) dan cameraMode jadi `RAIL`: `ImpossibleZone` menyusuri spline kamera (`useCinematicRail` menulis `railTarget`/`railLookAt`, di-`damp3` oleh `CameraDirector`) lalu memicu `setPhase("revelation")` di akhir rail.
 
 ## 5. Catatan teknis penting
 
@@ -102,8 +102,10 @@ mendekati cukup orb `Discoverable` memicu `setPhase("memories")`. Di `memories`,
   hidup membaca `useQualityTier()` untuk jumlah partikel/burung. PostFX berat hanya di high/ultra.
 - **Audio**: butuh gesture (sudah ditangani di `Threshold`). `AmbientAudio` fade-in saat `audioUnlocked`.
 - **Aset belum ada**: app tetap jalan tanpa file di `public/models|audio|textures|hdri`.
-- **CameraDirector** belum membaca `railTarget` dari `useCinematicRail` (sesuai
-  desain, RAIL baru dipakai Sprint 4). Wiring-nya additif, jangan refactor sekarang.
+- **CameraDirector** (Sprint 4) kini men-`damp3` kamera ke `railTarget` & menatap
+  `railLookAt` (shared vector dari `useCinematicRail`) saat mode RAIL/BLEND. Rail
+  sinematik fase aktif menulis kedua vektor itu (lihat `ImpossibleZone`). Mode FREE
+  tetap dikendalikan `PlayerController`.
 
 ## 6. Verifikasi yang sudah dilakukan
 
@@ -244,3 +246,30 @@ Verifikasi satu salinan React 19: `npm ls react react-dom` → harus **19.0.0** 
 - **Trigger buka kenangan memakai jarak HORIZONTAL (XZ)**, bukan jarak 3D. Alasan: portal di `memories.json` melayang tinggi (mis. `m1` y=8, `m2` y=40) sedangkan player mengambang di dekat tanah (`floorY` 1.8) -> jarak 3D tak pernah <= `openRadius` -> soft-lock. Dengan XZ, cukup berjalan di bawah/dekat portal. Bila Sprint 4+ menambah mode terbang/RAIL melewati portal, pertimbangkan kembali ke jarak 3D.
 - `MemoryZone` kini juga jadi placeholder untuk fase `impossible`/`revelation`/`finale` sampai zona Sprint 4–6 dibuat (lihat `PhaseManager`).
 - Mode tetap FREE (`PHASE_FLOW.memories`); player Sprint 2 tetap aktif menjelajah.
+
+---
+
+## 11. Work log — Sprint 4 (Impossible)
+
+**Hasil:** fase `impossible` kini punya zona & kamera sinematik sendiri. Saat `MemoryZone` memicu `setPhase("impossible")`: `Director` membalik gravitasi ke `[0,9.81,0]` (sudah ada sejak Sprint 0) sehingga player "jatuh ke atas", `usePhaseTimeline` menyetel cameraMode ke `RAIL`, dan `ImpossibleZone` mengambil alih kamera menyusuri spline lalu menuntun ke `revelation`.
+
+**File baru:**
+- `experience/world/zones/ImpossibleZone.tsx` — realm terbalik: pulau `FloatingIsland` yang "menggantung" tinggi (`IMPOSSIBLE.islands`). Di `useFrame` (hanya saat `phase === "impossible"`): set `railLookAt` ke pusat realm, majukan `elapsed`, `sample(t)` menulis `railTarget`, dan saat `t >= 1` panggil `setPhase(PHASE_FLOW.impossible.next)` sekali (guard ref). Tanpa setState di loop.
+
+**Edit kecil (additif / wiring):**
+- `experience/camera/CameraDirector.tsx` — disambungkan ke rail: saat mode `RAIL`/`BLEND`, `damp3` kamera ke `railTarget` (shared vector `useCinematicRail`) + `lookAt(railLookAt)`. Ini wiring yang memang disiapkan scaffold (alasan jelas: mengaktifkan RAIL Sprint 4); `desired` ref lokal yang tak terpakai dihapus. Bukan redesign.
+- `experience/phases/PhaseManager.tsx` — tambah cabang `impossible -> ImpossibleZone`; `memories -> MemoryZone` dieksplisitkan; `revelation`/`finale` tetap placeholder `MemoryZone`.
+- `lib/constants.ts` — tambah `IMPOSSIBLE` (`railPoints` spline CatmullRom, `railDuration` 18s, `lookAt`, `islands`).
+
+**Definition of Done Sprint 4:**
+- [x] `phase === "impossible"` menampilkan `ImpossibleZone`; gravitasi terbalik (player terangkat, via `Director` + `PlayerController` clamp `ceilingY`).
+- [x] Kamera beralih ke RAIL & bergerak sinematik (`damp3` menyusuri spline) tanpa input pemain.
+- [x] Transisi `impossible -> revelation` via store + `PHASE_FLOW` (di akhir rail).
+- [x] Checklist §2 Sprint 4 -> `[x]`; NEXT TASK dipindah ke Sprint 5.
+- [ ] `npm run dev` + 60fps tier high — **belum diverifikasi** (sandbox offline; jalankan di mesin Anda).
+
+**Catatan / risiko untuk sesi berikut:**
+- `revelation` & `finale` masih memakai `MemoryZone` sebagai placeholder (lihat `PhaseManager`). Keduanya bermode `RAIL` di `PHASE_FLOW` dengan `next` terisi tapi BELUM punya rail/zona — Sprint 5+ harus menambah zona ber-rail + auto-advance (pola `ImpossibleZone`), jika tidak fase akan diam (rail Sprint 4 hanya jalan saat `phase === "impossible"`).
+- `railDuration` (18s) menentukan kecepatan tur kamera; sesuaikan bila terasa lambat/cepat. `IMPOSSIBLE.railPoints`/`lookAt` bisa di-tweak untuk komposisi.
+- Saat RAIL, `PlayerController` early-return (`cameraMode !== "FREE"`), jadi tidak ada konflik kontrol kamera. Pertahankan invariant itu di sprint sinematik berikutnya.
+- Gravitasi hanya terbalik di `impossible`; `Director` mengembalikan `[0,-9.81,0]` di fase lain (termasuk `revelation`) — pertimbangkan saat membangun Revelation.

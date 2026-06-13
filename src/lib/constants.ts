@@ -150,3 +150,25 @@ export const MEMORY = {
   requiredRatio: 1, // rasio kenangan yang harus dibuka -> lanjut ke 'impossible'
   constellationSpread: 36, // sebaran titik konstelasi
 } as const;
+
+// Konstanta zona Impossible (Sprint 4) — realm terbalik + rail kamera sinematik.
+export const IMPOSSIBLE = {
+  // Titik rail kamera (CatmullRom) menaiki realm terbalik; dipakai useCinematicRail.
+  railPoints: [
+    [0, 2, 8],
+    [10, 6, 1],
+    [7, 14, -10],
+    [-9, 22, -8],
+    [-5, 30, 6],
+    [0, 27, 15],
+  ] as Array<[number, number, number]>,
+  railDuration: 18, // detik menempuh rail sebelum auto-advance ke 'revelation'
+  lookAt: [0, 14, -4] as [number, number, number], // fokus kamera ke pusat realm
+  // Pulau terapung yang kini "menggantung" tinggi (gravitasi terbalik, §4.3).
+  islands: [
+    { pos: [0, 14, -6], scale: 2.4, seed: 41 },
+    { pos: [-14, 22, -16], scale: 1.6, seed: 42 },
+    { pos: [12, 26, -10], scale: 2.0, seed: 43 },
+    { pos: [4, 34, 4], scale: 1.4, seed: 44 },
+  ] as Array<{ pos: [number, number, number]; scale: number; seed: number }>,
+};
