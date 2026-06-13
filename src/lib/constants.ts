@@ -136,3 +136,17 @@ export const DISCOVERY = {
   requiredToAdvance: 3, // jumlah penemuan untuk lanjut ke 'memories'
   sfx: "/audio/discover.webm", // opsional; aman jika belum ada (Howler tak crash)
 };
+
+// ----------------------------------------------------------------------------
+// Sprint 3 — Memory zone
+// Konstanta zona kenangan (jarak interaksi, ukuran artefak, ambang transisi).
+// ----------------------------------------------------------------------------
+export const MEMORY = {
+  portalRadius: 1.6, // jari-jari cakram portal kenangan
+  photoSize: 2.2, // sisi bidang foto melayang
+  photoLift: 2.6, // foto melayang di atas portal
+  openRadius: 3.0, // jarak untuk membuka kenangan (setActiveMemory)
+  glowRadius: 9, // jarak mulai aktivasi/cahaya portal
+  requiredRatio: 1, // rasio kenangan yang harus dibuka -> lanjut ke 'impossible'
+  constellationSpread: 36, // sebaran titik konstelasi
+} as const;

@@ -5,8 +5,8 @@
 | 0 | Skeleton (Next 15 + R3F + store + loop) | ✅ Selesai |
 | 1 | Awakening (sky, fog, pulau, burung, awan, motes, audio, kamera FREE) | ✅ Selesai |
 | 2 | Player & Discovery | ✅ Selesai |
-| 3 | Memories | ⏭️ NEXT TASK |
-| 4 | Impossible (gravity flip, camera RAIL) | ⬛ Belum |
+| 3 | Memories | ✅ Selesai |
+| 4 | Impossible (gravity flip, camera RAIL) | ⏭️ NEXT TASK |
 | 5 | Revelation | ⬛ Belum |
 | 6 | Finale | ⬛ Belum |
 | 7 | Polish & Perf | ⬛ Belum |
@@ -19,12 +19,12 @@
 
 **[Sprint 2] Player & Discovery — selesai:** player FREE bisa digerakkan (WASD + look + Shift lari + Space lompat) via `useCharacterMovement`, sadar-gravity; `DiscoveryZone` + orb `Discoverable` (proximity highlight/SFX); auto-advance `awakening→discovery` (minDuration) & `discovery→memories` (saat cukup orb). Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §9.
 
+**[Sprint 3] Memories — selesai:** `MemoryZone` membaca `memories.json`; portal shader (`memoryPortal/frag.glsl`) per kenangan + foto melayang (billboard, placeholder prosedural aman-aset) + dekor ambient (pohon/konstelasi). Mendekat -> `setActiveMemory`; semua kenangan dibuka -> transisi `memories→impossible`. Validasi statis OK (Prettier parse); runtime/fps **belum** diuji (offline). Detail di `HANDOFF.md` §10.
+
 **Lanjut di:** `NEXT_TASK.md` · **Konteks lengkap:** `HANDOFF.md`
 
 ## Ditangguhkan ke sprint berikut (jangan dianggap hilang)
 
-Komponen ini disebut di bible namun memang baru relevan di Sprint 3–6:
-`ui/FinaleOverlay.tsx`, `world/props/MemoryPhoto|MemoryTree|Constellation`,
-`MemoryPortal` (shader portal sudah ada di `shaders/memoryPortal/frag.glsl`),
-shader `godrays`, zona `Discovery|Memories|Impossible|Revelation|Finale`,
+Komponen ini disebut di bible namun memang baru relevan di Sprint 4–6:
+`ui/FinaleOverlay.tsx`, shader `godrays`, zona `Impossible|Revelation|Finale`,
 `DisintegrationFX`, `FaceParticles`.

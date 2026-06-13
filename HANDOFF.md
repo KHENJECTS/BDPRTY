@@ -3,7 +3,7 @@
 > File ini ditulis agar siapa pun (atau sesi AI berikutnya) bisa melanjutkan tanpa
 > menganalisis ulang project. Baca ini + `NEXT_TASK.md` lalu langsung lanjut.
 
-**Terakhir diperbarui:** akhir sesi Sprint 2 (Player & Discovery) — lihat §9. (Dependency di jalur React 19, §8.)
+**Terakhir diperbarui:** akhir sesi Sprint 3 (Memories) — lihat §10. (Dependency di jalur React 19, §8.)
 **Stack:** Next.js 15 · TS · R3F · three · drei · @react-three/postprocessing · GSAP · framer-motion · zustand · howler · GLSL.
 
 ---
@@ -25,8 +25,8 @@
 - [x] **Sprint 0 — Skeleton**: Next 15 + R3F + store + Threshold + PostFX + loop. Skeleton kini lengkap & runnable (semua import foundation ter-resolve).
 - [x] **Sprint 1 — Awakening**: skydome shader, fog volumetric (damped), pulau terapung, burung cahaya, awan parallax, motes, ambient audio, kamera floating (FREE), hint diegetik. **Mood lock tercapai.**
 - [x] **Sprint 2 — Player & Discovery**: player FREE (WASD + look + lari + lompat) via `useCharacterMovement`, sadar-gravity; `DiscoveryZone` + orb `Discoverable` (proximity highlight/SFX); transisi `awakening → discovery` (auto via minDuration) lalu `discovery → memories` (saat cukup orb ditemukan). Lihat §9.
-- [ ] **Sprint 3 — Memories** ← NEXT TASK (lihat `NEXT_TASK.md`)
-- [ ] **Sprint 4 — Impossible** (gravity flip, camera RAIL/GSAP)
+- [x] **Sprint 3 — Memories**: `MemoryZone` membaca `public/data/memories.json`; portal shader (`memoryPortal/frag.glsl`) per kenangan + foto melayang (billboard, placeholder prosedural aman-aset) + dekor ambient (pohon / konstelasi sesuai `placement`). Mendekati portal membuka kenangan (`setActiveMemory`); setelah semua kenangan dibuka -> transisi `memories → impossible`. Lihat §10.
+- [ ] **Sprint 4 — Impossible** (gravity flip, camera RAIL/GSAP) ← NEXT TASK (lihat `NEXT_TASK.md`)
 - [ ] **Sprint 5 — Revelation**
 - [ ] **Sprint 6 — Finale**
 - [ ] **Sprint 7 — Polish & Perf**
@@ -82,13 +82,15 @@ Bukan refactor/redesign.
 `PlayerController` (Sprint 2) menggerakkan kamera saat `cameraMode === "FREE"`
 memakai `useCharacterMovement` (WASD + pointer-lock look + Shift lari + Space
 lompat), memutasi posisi via ref dan menghormati `gravity` store. `PhaseManager`
-memilih zona: `threshold/awakening` -> `AwakeningZone`, selebihnya -> `DiscoveryZone`.
+memilih zona: `threshold/awakening` -> `AwakeningZone`, `discovery` -> `DiscoveryZone`, selebihnya (>= `memories`) -> `MemoryZone`.
 
 Flow fase: mulai di `threshold` -> klik tombol "tarik napas" (`Threshold.tsx`)
 meng-unlock audio + pointer lock + set phase `awakening`. `usePhaseTimeline`
 menyalakan jam global, meng-set cameraMode per `PHASE_FLOW`, dan auto-advance
 fase ber-`minDuration` (`awakening` 8s -> `discovery`). Dari `discovery`,
-mendekati cukup orb `Discoverable` memicu `setPhase("memories")`.
+mendekati cukup orb `Discoverable` memicu `setPhase("memories")`. Di `memories`,
+`MemoryZone` menampilkan portal kenangan; mendekati portal membuka kenangan
+(`setActiveMemory`) dan setelah semua kenangan dibuka memicu `setPhase("impossible")`.
 
 ## 5. Catatan teknis penting
 
@@ -209,3 +211,35 @@ Verifikasi satu salinan React 19: `npm ls react react-dom` → harus **19.0.0** 
 - SFX `/audio/discover.webm` opsional; aman bila belum ada (Howler tak crash).
 - Gerak vertikal sengaja gentle (`PLAYER.gravityScale` 0.35, hover di `floorY`); Sprint 4 membalik gravitasi via `Director` (sudah set `[0,9.81,0]` saat `impossible`) — clamp plafon (`ceilingY`) sudah disiapkan.
 - `PhaseManager` kini menampilkan `DiscoveryZone` sebagai placeholder untuk fase >= discovery; ganti cabang saat `MemoryZone` (Sprint 3) dibuat.
+
+---
+
+## 10. Work log — Sprint 3 (Memories)
+
+**Hasil:** zona Memory interaktif. Saat `phase === "memories"`, `MemoryZone` membaca `public/data/memories.json` dan menempatkan satu portal kenangan per entri + foto melayang + dekor ambient sesuai `placement`. Mendekati portal membuka kenangan; setelah semua kenangan dibuka, transisi ke `impossible`.
+
+**File baru:**
+- `hooks/useMemories.ts` — loader aman-SSR untuk `memories.json` (fetch di `useEffect`, list kosong sampai data tiba). Ekspor tipe `Memory` / `MemoriesData`.
+- `experience/world/zones/MemoryZone.tsx` — orchestrator: map kenangan -> `MemoryPortal` (+ `MemoryPhoto`), dekor `MemoryTree` (placement `tree`) / `Constellation` (placement `constellation`). Hitungan kenangan dibuka disimpan di `ref` (tanpa setState); transisi `memories -> impossible` (`PHASE_FLOW.memories.next`) dipusatkan di sini saat `requiredRatio` tercapai.
+- `experience/world/props/MemoryPortal.tsx` — cakram shader (`memoryPortal/frag.glsl`, pola SkyDome): `uActivation` di-damp oleh proximity, `uTime` via `useFrame`. Masuk `openRadius` -> `setActiveMemory(id)` + `onOpen(id)` (sekali). Foto = placeholder prosedural.
+- `experience/world/props/MemoryPhoto.tsx` — bidang foto melayang (billboard menghadap kamera, bob lembut); lebih terang saat kenangan aktif. Texture placeholder aman-aset.
+- `experience/world/props/MemoryTree.tsx` — pohon kenangan low-poly (ambient, gaya FloatingIsland).
+- `experience/world/props/Constellation.tsx` — titik bintang ambient (`pointsMaterial`), kepadatan per tier (pola ParticleField).
+- `lib/placeholderTexture.ts` — `makePlaceholderTexture(seed)`: `DataTexture` gradien prosedural (SSR-safe), pengganti `.ktx2` yang mungkin belum ada di `public/`.
+
+**Edit kecil (additif):**
+- `experience/phases/PhaseManager.tsx` — tambah cabang `discovery -> DiscoveryZone`, `memories` (dan fase lanjut yang belum punya zona) -> `MemoryZone`.
+- `lib/constants.ts` — tambah `MEMORY` (portalRadius, photoSize, photoLift, openRadius, glowRadius, requiredRatio, constellationSpread).
+
+**Definition of Done Sprint 3:**
+- [x] `MemoryZone` tampil saat `phase === "memories"`; >=1 `MemoryPhoto` + portal/konstelasi.
+- [x] Membuka kenangan mengisi `activeMemoryId` (tanpa setState di `useFrame`).
+- [x] Transisi `memories -> impossible` via store + `PHASE_FLOW`.
+- [x] Checklist §2 Sprint 3 -> `[x]`; NEXT TASK dipindah ke Sprint 4.
+- [ ] `npm run dev` + 60fps tier high — **belum diverifikasi** (sandbox offline; jalankan di mesin Anda).
+
+**Catatan / risiko untuk sesi berikut:**
+- Foto kenangan di `memories.json` menunjuk `.ktx2` (mis. `/textures/memories/01.ktx2`) yang mungkin belum ada; komponen sengaja memakai placeholder prosedural. Untuk foto nyata `.ktx2`, perlu `KTX2Loader` + transcoder basis (mis. drei `useKTX2`), tambahkan saat aset tersedia — JANGAN paksakan loader sekarang (offline, bisa crash).
+- `requiredRatio: 1` artinya SEMUA kenangan harus dibuka untuk lanjut ke `impossible`. Turunkan bila ingin lebih longgar.
+- `MemoryZone` kini juga jadi placeholder untuk fase `impossible`/`revelation`/`finale` sampai zona Sprint 4–6 dibuat (lihat `PhaseManager`).
+- Mode tetap FREE (`PHASE_FLOW.memories`); player Sprint 2 tetap aktif menjelajah.
