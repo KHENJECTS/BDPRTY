@@ -13,7 +13,9 @@
 
 **Verifikasi:** JSON valid (jq); 36 file TS/TSX/CSS/mjs ter-parse Prettier tanpa error & diformat.
 
-**[Sesi 2] Fix dependency:** runtime error `ReactCurrentOwner` (R3F v8 di atas React 19) sudah diperbaiki — React/react-dom dipin ke 18.3.1 + `overrides`. Setelah update WAJIB `rm -rf node_modules package-lock.json && npm install`. Detail di `HANDOFF.md` §7.
+**[Sesi 2] Fix dependency:** runtime error `ReactCurrentOwner` (R3F v8 di atas React 19) — sempat diperbaiki dengan pin React 18.3.1 + `overrides`. **Digantikan oleh Sesi 3.**
+
+**[Sesi 3] Migrasi React 19:** beralih ke React 19 + @react-three/fiber v9 + drei v10 + postprocessing v3 (jalur native Next 15). **`overrides` pin React 18 DIHAPUS** (wajib, kalau tidak upgrade batal). Audit kode statis: AMAN, tanpa perubahan kode. Setelah update WAJIB `rm -rf node_modules package-lock.json && npm install`. Detail di `HANDOFF.md` §8.
 
 **Lanjut di:** `NEXT_TASK.md` · **Konteks lengkap:** `HANDOFF.md`
 

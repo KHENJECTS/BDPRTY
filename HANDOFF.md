@@ -129,3 +129,44 @@ npm run dev
 Verifikasi satu salinan React 18: `npm ls react react-dom` -> harus 18.3.1 di semua cabang.
 
 **Catatan untuk sprint berikut:** jika suatu saat ingin pindah ke React 19, itu butuh upgrade ke @react-three/fiber v9 + drei v10 + @react-three/postprocessing v3 (perubahan major, di luar scope sekarang — JANGAN dilakukan tanpa alasan).
+
+---
+
+## 8. Fix log
+
+### [Sesi 3] Migrasi ke React 19 + React Three Fiber v9
+
+**Keputusan:** pindah dari jalur "pin React 18" (Sesi 2) ke jalur **React 19** — ini jalur native untuk Next 15. Mengganti seluruh lini 3D ke versi yang kompatibel React 19.
+
+**Perubahan `package.json`:**
+- `react` & `react-dom` → **`19.0.0`**
+- `@types/react` & `@types/react-dom` → **`19.0.0`**
+- `@react-three/fiber` → **`^9.6.1`** (lini React 19)
+- `@react-three/drei` → **`^10.7.7`** (butuh fiber v9)
+- `@react-three/postprocessing` → **`^3.0.4`** (butuh fiber v9)
+- `postprocessing` tetap `^6.36.4` (peer dari @react-three/postprocessing v3 → cocok)
+- `three` tetap `^0.169.0`, `@types/three` tetap `^0.169.0` (didukung fiber v9)
+- **`overrides` (pin React 18.3.1) DIHAPUS.** ⚠️ Ini WAJIB — jika blok itu tertinggal, `npm install` memaksa React kembali ke 18.3.1 dan upgrade batal (fiber v9 butuh React 19). Inilah penyebab utama jika error `ReactCurrentOwner`/peer-dep muncul lagi.
+
+**Audit kode (tanpa perlu ubah kode):** dipindai statis dan AMAN untuk React 19 / fiber v9:
+- Tidak ada `useRef()` tanpa argumen (semua `useRef<T>(null)`) — tipe React 19 tidak mengizinkan ref tanpa nilai awal.
+- Tidak ada pemakaian namespace `JSX` global (fiber v9 mengaugmentasi `React.JSX`).
+- Tidak ada `React.FC`/`forwardRef` yang perlu disesuaikan.
+- Impor `@react-three/{fiber,drei,postprocessing}` semua via entry-point standar yang tetap ada di v9/v10/v3 (`Canvas`, `useFrame`, `useThree`, `PerformanceMonitor`, `AdaptiveDpr`, `AdaptiveEvents`, `Preload`, `useProgress`, `EffectComposer`, `Bloom`, `DepthOfField`, `ChromaticAberration`, `Vignette`).
+- `tsconfig`: `jsx: "preserve"` + default import source — sudah benar, tidak diubah.
+- Komponen 3D (`SkyDome`, `PostFX`, dll.) tidak memakai API yang berubah di v9/v3.
+
+**WAJIB saat menerapkan (versi mayor berubah — install harus bersih):**
+```bash
+rm -rf node_modules package-lock.json   # Windows: rmdir /s /q node_modules & del package-lock.json
+npm install
+npm run dev
+```
+Verifikasi satu salinan React 19: `npm ls react react-dom` → harus **19.0.0** di semua cabang, dan `npm ls @react-three/fiber` → 9.x.
+
+**Catatan peer-deps yang perlu dicek saat install:**
+- `framer-motion ^11.11.0` — mendukung React 19. Jika npm mengeluh peer, naikkan ke `framer-motion@^11.18.0`.
+- `zustand ^5` — sudah mendukung React 19. OK.
+- Jika ada peer warning three, pastikan satu salinan three 0.169 (`npm ls three`).
+
+**Status jalur ini vs Sesi 2:** entri Sesi 2 (§7, pin React 18.3.1 + overrides) kini **digantikan** oleh Sesi 3. Jangan terapkan keduanya bersamaan.
